@@ -148,6 +148,8 @@ public:
     Data<Real>           d_speed;
     Data<Coord>          d_startingPos;
     Data<Real>           d_threshold;
+    Data<Real>           d_instrumentSpireDiameter;
+    Data<Real>           d_bendStep;
     Data<type::vector<Real>>   d_rigidCurvAbs; // Pairs (start - end)
     Data<std::string>    d_motionFilename;
     Data<unsigned int>   d_indexFirstNode; // First Node simulated

@@ -72,6 +72,8 @@ InterventionalRadiologyController<DataTypes>::InterventionalRadiologyController(
 , d_rigidCurvAbs(initData(&d_rigidCurvAbs, "rigidCurvAbs", "pairs of curv abs for beams we want to rigidify"))
 , d_motionFilename(initData(&d_motionFilename, "motionFilename", "text file that includes tracked motion from optical sensor"))
 , d_indexFirstNode(initData(&d_indexFirstNode, (unsigned int) 0, "indexFirstNode", "first node (should be fixed with restshape)"))
+, d_instrumentSpireDiameter(initData(&d_instrumentSpireDiameter, "instrumentSpireDiameter", "the path to the radius of the catheter bend"))
+, d_bendStep(initData(&d_bendStep, (Real)3.1416/20.0, "bendStep", "base step when changing beam bending"))
 {
     m_fixedConstraint = nullptr;
     m_dropCall = false;
@@ -240,58 +242,67 @@ template <class DataTypes>
 void InterventionalRadiologyController<DataTypes>::onKeyPressedEvent(KeypressedEvent *kev)
 {
     /// Control keys for interventonal Radiology simulations:
-    switch(kev->getKey())
-    {
-        case 'D':
-            applyAction(BeamAdapterAction::DROP_TOOL);
-            break;
-        case '2':
-            applyAction(BeamAdapterAction::USE_TOOL_2);
-            break;
-        case '1':
-            applyAction(BeamAdapterAction::USE_TOOL_1);
-            break;
-        case '0':
-            applyAction(BeamAdapterAction::USE_TOOL_0);
-            break;
-        case 20: // droite = 20
-            applyAction(BeamAdapterAction::SPIN_RIGHT);
-            break;
-        case 18: // gauche = 18
-            applyAction(BeamAdapterAction::SPIN_LEFT);
-            break;
-        case 19: // fleche haut = 19
-            applyAction(BeamAdapterAction::MOVE_FORWARD);
-            break;
-        case 21: // bas = 21
-            applyAction(BeamAdapterAction::MOVE_BACKWARD);
-            break;
-        case '*':
-            {
-                if(m_RW)
-                {
-                    m_RW=false;
+    //switch(kev->getKey())
+    //{
+    //    case 'D':
+    //        applyAction(BeamAdapterAction::DROP_TOOL);
+    //        break;
+    //    case '2':
+    //        applyAction(BeamAdapterAction::USE_TOOL_2);
+    //        break;
+    //    case '1':
+    //        applyAction(BeamAdapterAction::USE_TOOL_1);
+    //        break;
+    //    case '0':
+    //        applyAction(BeamAdapterAction::USE_TOOL_0);
 
-                }
-                else
-                {
-                    m_FF = true;
-                }
-            }
-            break;
-        case '/':
-            {
-                if(m_FF)
-                {
-                    m_FF=false;
-                }
-                else
-                {
-                    m_RW = true;
-                }
-            }
-            break;
-    }
+    //        break;
+    //    case 20: // droite = 20
+    //        applyAction(BeamAdapterAction::SPIN_RIGHT);
+    //        break;
+    //    case 18: // gauche = 18
+    //        applyAction(BeamAdapterAction::SPIN_LEFT);
+    //        break;
+    //    case 19: // fleche haut = 19
+    //        msg_warning() << "Movin Forward.";
+    //        applyAction(BeamAdapterAction::MOVE_FORWARD);
+    //        break;
+    //    case 21: // bas = 21
+    //        msg_warning() << "Movin Back.";
+    //        applyAction(BeamAdapterAction::MOVE_BACKWARD);
+    //        break;
+    //    case '6':
+    //        applyAction(BeamAdapterAction::BEND_TOOL);
+    //        break;
+    //    case '9':
+    //        applyAction(BeamAdapterAction::UNBEND_TOOL);
+    //        break;
+    //    case '*':
+    //        {
+    //            if(m_RW)
+    //            {
+    //                m_RW=false;
+
+    //            }
+    //            else
+    //            {
+    //                m_FF = true;
+    //            }
+    //        }
+    //        break;
+    //    case '/':
+    //        {
+    //            if(m_FF)
+    //            {
+    //                m_FF=false;
+    //            }
+    //            else
+    //            {
+    //                m_RW = true;
+    //            }
+    //        }
+    //        break;
+    //}
 }
 
 
@@ -371,25 +382,51 @@ void InterventionalRadiologyController<DataTypes>::applyAction(sofa::beamadapter
     case BeamAdapterAction::MOVE_FORWARD:
     {
         auto xInstrTip = sofa::helper::getWriteOnlyAccessor(d_xTip);
-        xInstrTip[id] += d_step.getValue();
+        for (int id = 0; id < xInstrTip.size(); id++)
+        {
+            msg_warning() << "Controlled Instument num " << id << "Is being controller).";
+            xInstrTip[id] += d_step.getValue();
+        }
         break;
     }
     case BeamAdapterAction::MOVE_BACKWARD:
     {
         auto xInstrTip = sofa::helper::getWriteOnlyAccessor(d_xTip);
-        xInstrTip[id] -= d_step.getValue();
+        for (int id = 0; id < xInstrTip.size(); id++)
+        {
+            msg_warning() << "Controlled Instument num " << id << "Is being controller).";
+            xInstrTip[id] -= d_step.getValue();
+        }
         break;
     }
     case BeamAdapterAction::SPIN_RIGHT:
     {
         auto rotInstrument = sofa::helper::getWriteOnlyAccessor(d_rotationInstrument);
-        rotInstrument[id] += d_angularStep.getValue();
+        for (int id = 0; id < rotInstrument.size(); id++)
+        {
+            rotInstrument[id] += d_angularStep.getValue();
+        }
         break;
     }
     case BeamAdapterAction::SPIN_LEFT:
     {
         auto rotInstrument = sofa::helper::getWriteOnlyAccessor(d_rotationInstrument);
-        rotInstrument[id] -= d_angularStep.getValue();
+        for(int id = 0; id < rotInstrument.size(); id++)
+        {
+            rotInstrument[id] -= d_angularStep.getValue();
+        }
+        break;
+    }
+    case BeamAdapterAction::BEND_TOOL:
+    {
+        // auto spireDiameter = sofa::helper::getWriteOnlyAccessor(d_instrumentSpireDiameter);
+        // d_instrumentSpireDiameter.setValue(d_instrumentSpireDiameter.getValue() - d_bendStep.getValue());
+        break;
+    }
+    case BeamAdapterAction::UNBEND_TOOL:
+    {
+        // auto spireDiameter = sofa::helper::getWriteOnlyAccessor(d_instrumentSpireDiameter);
+        // d_instrumentSpireDiameter.setValue(d_instrumentSpireDiameter.getValue() + d_bendStep.getValue());
         break;
     }
     case BeamAdapterAction::SWITCH_NEXT_TOOL:
@@ -850,11 +887,11 @@ void InterventionalRadiologyController<DataTypes>::applyInterventionalRadiologyC
             //2. this is not the case and the node position can be interpolated using previous step positions
         if ((xCurvAbs - std::numeric_limits<float>::epsilon()) > prev_maxCurvAbs + threshold)
         {
-            msg_error() << "Case 1 should never happen ==> avoid using totalLengthIsChanging! xCurvAbs = " << xCurvAbs 
-                << " > prev_maxCurvAbs = " << prev_maxCurvAbs << " + threshold: " << threshold << "\n"
-                << "\n | newCurvAbs: " << newCurvAbs                
-                << "\n | modifiedCurvAbs: " << modifiedCurvAbs
-                << "\n | previous nodeCurvAbs: " << m_nodeCurvAbs;
+            // msg_error() << "Case 1 should never happen ==> avoid using totalLengthIsChanging! xCurvAbs = " << xCurvAbs 
+            //    << " > prev_maxCurvAbs = " << prev_maxCurvAbs << " + threshold: " << threshold << "\n"
+            //    << "\n | newCurvAbs: " << newCurvAbs                
+            //    << "\n | modifiedCurvAbs: " << modifiedCurvAbs
+            //    << "\n | previous nodeCurvAbs: " << m_nodeCurvAbs;
             // case 1 (the abs curv is further than the previous state of the instrument)
             // verifier qu'il s'agit bien d'un instrument qu'on est en train de controller
             // interpoler toutes les positions "sorties" de l'instrument en supprimant l'ajout de dx qu'on vient de faire

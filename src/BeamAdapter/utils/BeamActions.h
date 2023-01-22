@@ -38,6 +38,8 @@ namespace sofa::beamadapter
         USE_TOOL_0,
         USE_TOOL_1,
         USE_TOOL_2,
+        BEND_TOOL,
+        UNBEND_TOOL
     };
 
     /// \brief map of action as string keyword instead of int for better clarity in scene scripting
@@ -51,7 +53,9 @@ namespace sofa::beamadapter
         {"dropT", BeamAdapterAction::DROP_TOOL},
         {"tool0", BeamAdapterAction::USE_TOOL_0},
         {"tool1", BeamAdapterAction::USE_TOOL_1},
-        {"tool2", BeamAdapterAction::USE_TOOL_2}
+        {"tool2", BeamAdapterAction::USE_TOOL_2},
+        {"bend", BeamAdapterAction::BEND_TOOL},
+        {"unbend", BeamAdapterAction::UNBEND_TOOL}
     };
 
     /// static method to convert an action as string into enum class using @sa beamActionNames
