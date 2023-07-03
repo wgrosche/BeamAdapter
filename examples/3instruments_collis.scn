@@ -144,7 +144,7 @@
 
 	
 
-	<Node name='CollisionModel'> 
+	<!-- <Node name='CollisionModel'> 
 		<MeshObjLoader name='meshLoader' filename='mesh/phantom.obj' triangulate='true' flipNormals='1'/>
 		<MeshTopology position='@meshLoader.position'  triangles='@meshLoader.triangles'/>
 		<MechanicalObject name='DOFs1' position='0 0 400' scale='3' ry='90'/>	
@@ -152,7 +152,26 @@
 		<LineCollisionModel simulated='0' moving='0'/>
 		<PointCollisionModel simulated='0' moving='0'/>
 		<OglModel name='Visual' src='@meshLoader' color='1 0 0 0.3' scale='3' ry='90'/>
-	</Node>
+	</Node> -->
+
+
+	<Node name="DeformableLiver">
+        
+        <VisualStyle displayFlags="showForceFields" />
+        
+        <MechanicalObject />
+        <UniformMass totalMass="1000.0" />
+        <SparseGridTopology n="8 6 6" fileTopology="mesh/liver-smooth.obj" />
+        <BoxROI name="box1" box="-2.5 0 -2.5 7.5 3 2" />
+        <FixedConstraint indices="@box1.indices"/>
+        <HexahedronFEMForceField poissonRatio="0" youngModulus="7000"/>
+        <FFDDistanceGridCollisionModel  fileFFDDistanceGrid="mesh/liver-smooth.obj" scale="10000.0" usePoints="0" proximity="0.1" contactStiffness="500.0" contactFriction="0.0" position="100 0 0"/>
+        <Node name="Visu">
+            <MeshOBJLoader name="meshLoader_0" filename="mesh/liver-smooth.obj" translation="0 0 0" handleSeams="1" scale="10000.0"/>
+            <OglModel name="Visual" src="@meshLoader_0" color="red" />
+            <BarycentricMapping input="@.." output="@Visual" />
+        </Node>
+    </Node>
 	
 	
 	
